@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Apartment {
+  id              Int              @id @default(autoincrement())
+  title           String
+  description     String
+  price           Float
+  currency        String           @default("₾")
+  pricePer        String           @default("ночь")
+  address         String
+  area            Float            // in square meters
+  rooms           Int
+  floor           Int
+  maxGuests       Int
+  beds            Int
+  bathrooms       Int
+  checkInTime     String           @default("14:00")
+  checkOutTime    String           @default("12:00")
+  isAvailable     Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  slug            String           @unique
+
+  images          ApartmentImage[]
+  amenities       Amenity[]
+  bookings        Booking[]
+}
+
+model ApartmentImage {
+  id          Int        @id @default(autoincrement())
+  url         String
+  isMain      Boolean    @default(false)
+  order       Int        @default(0)
+  apartment   Apartment  @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  apartmentId Int
+}
+
+model Amenity {
+  id          Int         @id @default(autoincrement())
+  name        String
+  icon        String?     // Can be class name or icon name
+  apartments  Apartment[]
+}
+
+model Booking {
+  id          Int        @id @default(autoincrement())
+  name        String
+  phone       String
+  email       String?
+  comment     String?
+  status      String     @default("new") // new, in_progress, completed
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  apartment   Apartment  @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  apartmentId Int
+}
+
+model AdminUser {
+  id          Int        @id @default(autoincrement())
+  username    String     @unique
+  password    String     // Hashed password
+  createdAt   DateTime   @default(now())
+}
